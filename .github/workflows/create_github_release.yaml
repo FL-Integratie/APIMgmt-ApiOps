@@ -233,9 +233,10 @@ jobs:
         with:
           files: |
             ${{github.workspace}}/artifact/extractor.win-x64.exe
-            ${{github.workspace}}/artifact/extractor.linux-x64         
+            ${{github.workspace}}/artifact/extractor.win-x64
+            ${{github.workspace}}/artifact/extractor.linux-x64
             ${{github.workspace}}/artifact/publisher.win-x64.exe
-            ${{github.workspace}}/artifact/publisher.linux-x64           
+            ${{github.workspace}}/artifact/publisher.linux-x64
             ${{github.workspace}}/artifact/Github.zip
             ${{github.workspace}}/artifact/Azure_DevOps.zip
           name: APIOps Toolkit for Azure APIM ${{ github.event.inputs.Release_Version }}
