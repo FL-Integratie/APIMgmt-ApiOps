@@ -99,7 +99,7 @@ internal static class Logger
                 .Select(file => (Name: GetLoggerName(file), Json: file.ReadAsJsonObject()))
                 .LeftJoin(configurationArtifacts,
                           keySelector: artifact => artifact.Name,
-                          bothSelector: (fileArtifact, configurationArtifact) => (fileArtifact.Name, fileArtifact.Json.Merge(configurationArtifact.Json)));
+                          bothSelector: (fileArtifact, configurationArtifact) => (configurationArtifact.Json.TryGetStringProperty("overrideName") is not null ? new LoggerName(configurationArtifact.Json.GetStringProperty("overrideName")) : fileArtifact.Name, fileArtifact.Json.Merge(configurationArtifact.Json)));
     }
 
     private static IEnumerable<(LoggerName Name, JsonObject Json)> GetConfigurationLoggers(JsonObject configurationJson)
