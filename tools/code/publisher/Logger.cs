@@ -12,11 +12,19 @@ namespace publisher;
 
 internal static class Logger
 {
-    public static async ValueTask ProcessDeletedArtifacts(IReadOnlyCollection<FileInfo> files, ServiceDirectory serviceDirectory, ServiceUri serviceUri, DeleteRestResource deleteRestResource, ILogger logger, CancellationToken cancellationToken)
+    public static async ValueTask ProcessDeletedArtifacts(JsonObject configurationJson, ServiceDirectory serviceDirectory, ServiceUri serviceUri, DeleteRestResource deleteRestResource, ILogger logger, CancellationToken cancellationToken)
     {
-        await GetLoggerInformationFiles(files, serviceDirectory)
-                .Select(GetLoggerName)
-                .ForEachParallel(async loggerName => await Delete(loggerName, serviceUri, deleteRestResource, logger, cancellationToken),
+        var loggerNames = configurationJson.TryGetJsonArrayProperty("loggers")
+                                .IfNullEmpty()
+                                .Choose(node => node as JsonObject)
+                                .Choose(jsonObject =>
+                                {
+                                    var name = jsonObject.TryGetStringProperty("overrideName");
+                                    return name is null
+                                            ? jsonObject.TryGetStringProperty("name") is not null ? new LoggerName(jsonObject.GetStringProperty("name")) : null as LoggerName
+                                            : new LoggerName(jsonObject.GetStringProperty("overrideName"));
+                                });
+        await loggerNames.ForEachParallel(async loggerName => await Delete(loggerName, serviceUri, deleteRestResource, logger, cancellationToken),
                                  cancellationToken);
     }
 
